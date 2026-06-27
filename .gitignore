@@ -1,0 +1,8 @@
+# never commit real specs or secrets
+specs/*.local.yaml
+.env
+*.pem
+*.key
+node_modules/
+*.log
+.DS_Store

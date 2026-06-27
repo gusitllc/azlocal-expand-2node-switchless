@@ -1,0 +1,28 @@
+# Example spec for upgrading an EXISTING 1-node Azure Local cluster to 2-node switchless.
+# Copy to specs/<name>.local.yaml (gitignored) and fill in real values.
+# NO secrets here — creds come from the environment at runtime.
+
+existing_cluster:
+  name: my-1node-fl              # the cluster to expand
+  resource_group: my-rg
+  custom_location: my-1node-fl-cl
+  current_node_serial: EXISTING_TAG   # confirm via match-clusters.sh (don't add a node into itself!)
+  has_live_workloads: true       # if true: extra care — schedule a window, the cluster stays serving
+
+new_node:                        # the host to ADD (homogeneous with the existing node)
+  name: node-b
+  idrac: 192.168.10.X
+  serial: SERVICE_TAG_B          # must differ from existing_cluster.current_node_serial
+  gpu_match_required: true       # if the existing node has a GPU, the new node should match it
+
+network:
+  switchless: true               # storage NICs of the new node cross-cabled to the existing node
+  storage_nics: [NIC.Slot.2-1-1, NIC.Slot.2-2-1]
+
+witness:
+  type: cloud                    # cloud | fileshare — a 2-node cluster REQUIRES a witness
+
+aks_arc:
+  extend_nodepool: true          # after the node joins, grow the AKS-Arc nodepool onto it
+  cluster_name: aks-myworkload-prod
+  nodepool: nodepool1
