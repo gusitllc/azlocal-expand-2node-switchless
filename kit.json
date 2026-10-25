@@ -1,0 +1,53 @@
+{
+  "schema": "luca-kit/1",
+  "id": "azlocal-expand-2node-switchless",
+  "name": "Expand 1-node to 2-node switchless",
+  "category": "Azure Local",
+  "runtime": "scripts",
+  "summary": "Adds a second node to an existing single-node Azure Local cluster to make it 2-node switchless: host inventory, a spec file, a checklist runbook for the physical steps, and a script for the add-node and AKS Arc nodepool steps.",
+  "license": null,
+  "entry": {
+    "shell": "bash",
+    "requiresAdmin": false
+  },
+  "tools": [
+    {
+      "id": "inventory",
+      "label": "Host inventory",
+      "command": "bash discover/inventory.sh",
+      "description": "Read-only iDRAC Redfish inventory of a host range (power, model, RAM, CPU, GPU, serial, health). Credentials from IDRAC_USER and IDRAC_PASS."
+    },
+    {
+      "id": "match",
+      "label": "Match hosts to clusters",
+      "command": "bash discover/match-clusters.sh",
+      "description": "Read-only: which host serial belongs to which cluster, so you never add a node into itself."
+    },
+    {
+      "id": "upgrade",
+      "label": "Add the node",
+      "command": "bash build/upgrade-to-2node.sh",
+      "description": "Runs the add-node and extends the AKS Arc nodepool from SPEC=<your spec>; --dry-run prints the plan. Changes a live cluster."
+    }
+  ],
+  "prerequisites": [
+    "An existing single-node Azure Local cluster and a second matching Dell server (same model; matching GPU if the first has one) with no data to keep",
+    "Storage NICs cross-cabled to the existing node; the new node imaged with the same OS build and Arc-registered",
+    "A witness (cloud storage account or file share): mandatory at two nodes",
+    "bash, curl, the Azure CLI (logged in) and Python 3 with PyYAML",
+    "A maintenance window: the existing node may be serving workloads"
+  ],
+  "docs": [
+    {
+      "label": "README",
+      "path": "README.md"
+    },
+    {
+      "label": "Runbook",
+      "path": "RUNBOOK.md"
+    }
+  ],
+  "claudePrompt": "Read README.md and RUNBOOK.md first. Help me inventory the hosts, confirm which host belongs to which cluster, write my spec from specs/example.yaml, and work through the runbook checklist; run build/upgrade-to-2node.sh with --dry-run first and explain the plan. Stop and ask before any step that re-images, wipes, reboots, deletes or changes a server or Azure resource.",
+  "documents": [],
+  "brands": {}
+}
